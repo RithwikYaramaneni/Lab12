@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Fixes the bogus PATH error and allows Jenkins to find system commands on macOS
+        // Ensures standard binaries are accessible on macOS
         PATH = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:${env.PATH}"
         DOCKER_HUB_CRED = 'docker-hub-credentials'
         DOCKER_IMAGE    = 'your-dockerhub-username/node-blue-green'
@@ -18,20 +18,19 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}:${BUILD_TAG}")
-                    dockerImageTagLatest = docker.build("${DOCKER_IMAGE}:latest")
-                }
+                // Native shell commands replace the Docker Pipeline plugin dependency
+                sh "docker build -t ${DOCKER_IMAGE}:${BUILD_TAG} ."
+                sh "docker tag ${DOCKER_IMAGE}:${BUILD_TAG} ${DOCKER_IMAGE}:latest"
             }
         }
 
         stage('Push Image to Docker Hub') {
             steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_HUB_CRED}") {
-                        dockerImage.push("${BUILD_TAG}")
-                        dockerImageTagLatest.push("latest")
-                    }
+                // Uses Jenkins credentials binding for Docker Hub login
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CRED}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                    sh "docker push ${DOCKER_IMAGE}:${BUILD_TAG}"
+                    sh "docker push ${DOCKER_IMAGE}:latest"
                 }
             }
         }
