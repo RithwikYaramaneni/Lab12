@@ -46,13 +46,21 @@ pipeline {
                         echo "Active environment is BLUE. Deploying to GREEN..."
                         sh 'docker compose up -d app_green'
                         sh "sed -i '' 's/app_blue:3000/app_green:3000/g' nginx.conf"
+                        
+                        // Copy updated config directly into container to avoid host-mount issues
+                        sh 'docker cp nginx.conf nginx_proxy:/etc/nginx/nginx.conf'
                         sh 'docker exec nginx_proxy nginx -s reload'
+                        
                         echo "Traffic routed to GREEN environment."
                     } else {
                         echo "Active environment is GREEN. Deploying to BLUE..."
                         sh 'docker compose up -d app_blue'
                         sh "sed -i '' 's/app_green:3000/app_blue:3000/g' nginx.conf"
+                        
+                        // Copy updated config directly into container to avoid host-mount issues
+                        sh 'docker cp nginx.conf nginx_proxy:/etc/nginx/nginx.conf'
                         sh 'docker exec nginx_proxy nginx -s reload'
+                        
                         echo "Traffic routed to BLUE environment."
                     }
                 }
