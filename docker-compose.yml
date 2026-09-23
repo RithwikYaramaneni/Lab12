@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   app_blue:
-    image: ${DOCKER_USER}/node-blue-green:latest
+    image: rithwik8/node-blue-green:latest
     container_name: app_blue
     ports:
       - "8081:3000"
@@ -11,7 +9,7 @@ services:
       - VERSION=Blue-1.0.0
 
   app_green:
-    image: ${DOCKER_USER}/node-blue-green:latest
+    image: rithwik8/node-blue-green:latest
     container_name: app_green
     ports:
       - "8082:3000"
