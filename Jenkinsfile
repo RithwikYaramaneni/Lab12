@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         PATH = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:${env.PATH}"
-        DOCKER_HUB_CRED = 'docker-hub-credentials'
+        DOCKER_HUB_CRED = 'ef612410-82cc-4693-8427-60a3e608123f'
         DOCKER_IMAGE    = 'rithwik8/node-blue-green'
         BUILD_TAG       = "${BUILD_NUMBER}"
     }
